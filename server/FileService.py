@@ -1,3 +1,6 @@
+import os
+import time
+
 
 def change_dir(path, autocreate=True):
     """Change current directory of app.
@@ -10,10 +13,13 @@ def change_dir(path, autocreate=True):
         RuntimeError: if directory does not exist and autocreate is False.
     """
 
-    pass
+    if not os.path.exists(path):
+        os.makedirs(path)
+    
+    os.chdir(path)
 
 
-def get_files():
+def get_files(path='./'):
     """Get info about all files in working directory.
 
     Returns:
@@ -23,9 +29,19 @@ def get_files():
         - edit_date (datetime): date of last file modification.
         - size (int): size of file in bytes.
     """
-
-    pass
-
+    list_of_file_dicts = []
+    file_names = os.listdir(path)
+    for file_name in file_names:
+        file_path = os.path.join(path, file_name)
+        file_dict = {
+            'name': file_name,
+            'create_date':  time.ctime(os.path.getctime(file_path)),
+            'edit_date':  time.ctime(os.path.getctime(file_path)),
+            'size': int(os.stat(file_path).st_size)
+        }
+        list_of_file_dicts.append(file_dict)
+    return list_of_file_dicts
+    
 
 def get_file_data(filename):
     """Get full info about file.
@@ -67,7 +83,11 @@ def create_file(filename, content=None):
         ValueError: if filename is invalid.
     """
 
-    pass
+    with open(filename, 'wb') as file_handler:
+        if content:
+            data = bytes(content)
+            file_handler.write(data)
+
 
 
 def delete_file(filename):

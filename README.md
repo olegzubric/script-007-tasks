@@ -1,4 +1,12 @@
 
-# <project name> project
+# File server project
 
-Author is <author name>.
+Author is Maxim Suslov.
+
+## Сделанные требования
+
+TODO: заполните требования
+
+## Желаемые требования
+
+TODO: заполните требования

@@ -1,8 +1,16 @@
+import logging
 import os
 import re
 import shutil
 
 import utils.TimeUtils as TimeUtils
+
+# logger = logging.getLogger(__name__)
+
+
+def _is_unsafe_folder_name(path):
+    # security check
+    return re.search(r'(^|[\\/])\.\.($|[\\/])', path)
 
 
 def change_dir(path, autocreate=True):
@@ -14,7 +22,11 @@ def change_dir(path, autocreate=True):
 
     Raises:
         RuntimeError: if directory does not exist and autocreate is False.
+        ValueError: if path is invalid.
     """
+
+    if _is_unsafe_folder_name(path):
+        raise ValueError('Incorrect value of folder: {}'.format(path))
 
     if not os.path.exists(path):
         if autocreate:
@@ -22,6 +34,7 @@ def change_dir(path, autocreate=True):
         else:
             raise RuntimeError('Directory {} is not found'.format(path))
     os.chdir(path)
+    logging.debug('change working directory to %s', path)
 
 
 def get_files():
@@ -72,8 +85,7 @@ def _filename_to_local_path(filename, folder_autocreate=False):
         ValueError: if filename is invalid.
     """
 
-    # security check
-    if re.search(r'(^|[\\/])\.\.($|[\\/])', filename):
+    if _is_unsafe_folder_name(filename):
         raise ValueError('Incorrect value of filename: {}'.format(filename))
 
     path = os.getcwd()
@@ -140,7 +152,7 @@ def create_file(filename, content=None):
     local_file = _filename_to_local_path(filename)
 
     if os.path.exists(local_file):
-        print('WARNING: file {} exists'.format(local_file))
+        logging.warn('file %s exists', local_file)
 
     with open(local_file, 'wb') as file_handler:
         if content:

@@ -1,0 +1,11 @@
+
+# python
+__pycache__/
+*.pyc
+
+# virtual environment
+.venv*/
+venv*/
+
+# default data folder
+/data/

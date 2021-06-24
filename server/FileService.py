@@ -1,3 +1,4 @@
+import logging
 import os
 import re
 import shutil
@@ -31,6 +32,7 @@ def change_dir(path, autocreate=True):
         else:
             raise RuntimeError('Directory {} is not found'.format(path))
     os.chdir(path)
+    logging.debug('change working directory to %s', path)
 
 
 def get_files():
@@ -148,7 +150,7 @@ def create_file(filename, content=None):
     local_file = _filename_to_local_path(filename)
 
     if os.path.exists(local_file):
-        print('WARNING: file {} exists'.format(local_file))
+        logging.warn('file %s exists', local_file)
 
     with open(local_file, 'wb') as file_handler:
         if content:

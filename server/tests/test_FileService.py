@@ -25,7 +25,7 @@ def helper_rm(path):
         os.remove(path)
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope='function', autouse=True)
 def safe_cleanup(request):
     def cleanup():
         os.chdir(os.path.dirname(os.path.abspath(__file__)))

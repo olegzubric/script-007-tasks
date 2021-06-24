@@ -1,6 +1,8 @@
 #!/usr/bin/env python2
 import argparse
 import json
+import logging
+import logging.config
 import os
 import sys
 
@@ -18,11 +20,44 @@ def commandline_parser():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-f', '--folder', default=os.path.join(os.getcwd(), 'data'),
-        help="working directory (default: 'data' folder)")
+    parser.add_argument('-f', '--folder', default=os.path.join(os.getcwd(), 'data'), type=str,
+                        help="working directory (default: 'data' folder)")
+    parser.add_argument('--log-level', default='warning', choices=['debug', 'info', 'warning', 'error'],
+                        help='Log level to console (default is warning)')
+    parser.add_argument('-l', '--log-file', type=str, help='Log file.')
 
     return parser
+
+
+def setup_logger(level='NOTSET', filename=None):
+    config = {
+        'version': 1,
+        'formatters': {
+            'default': {
+                'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+            },
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'default',
+                'level': level,
+            },
+        },
+        'root': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        }
+    }
+    if filename:
+        config['handlers']['file'] = {
+            'class': 'logging.FileHandler',
+            'encoding': 'UTF-8',
+            'formatter': 'default',
+            'filename': filename,
+        }
+        config['root']['handlers'].append('file')
+    logging.config.dictConfig(config)
 
 
 def command_change_dir():
@@ -127,8 +162,12 @@ def main():
     """
     parser = commandline_parser()
     params = parser.parse_args()
+    setup_logger(level=logging.getLevelName(params.log_level.upper()), filename=params.log_file)
+
     path = params.folder
     FileService.change_dir(path)
+
+    logging.debug('initialized')
 
     functions = {
         'help': command_help,
@@ -140,26 +179,30 @@ def main():
         'exit': command_exit,
     }
 
+    def to_json(obj):
+        return json.dumps(obj, indent=2, sort_keys=True, default=StrUtils.json_serialize_helper)
+
     command_help()
     while True:
+        command = raw_input('Input command: ')
         try:
-            command = raw_input('Input command: ')
-
             def cmd_unknown():
                 print("Unknown command: {}".format(command))
 
             result = functions.get(command, cmd_unknown)()
+            logging.debug('executing %s, result %s', command, to_json(result))
 
-            print(json.dumps({
+            print(to_json({
                 'status': 'success',
                 'result': result,
-            }, indent=2, sort_keys=True, default=StrUtils.json_serialize_helper))
+            }))
 
         except Exception as err:
-            print(json.dumps({
+            logging.info('executing %s, face an exception %s', command, str(err))
+            print(to_json({
                 'status': 'error',
                 'result': str(err),
-            }, indent=2, sort_keys=True, default=StrUtils.json_serialize_helper))
+            }))
 
 
 if __name__ == '__main__':

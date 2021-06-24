@@ -22,11 +22,10 @@
 
 ```python
 import logging
-logger = logging.getLogger(__name__)
 ```
 
 а затем напишите необходимые вызовы для записи сообщений в журнал, например:
 
 ```python
-logger.debug('Found %i files to process', len(filenames)) 
+logging.debug('Found %i files to process', len(filenames)) 
 ```

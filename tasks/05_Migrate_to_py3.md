@@ -51,6 +51,8 @@ $ 2to3 -w -n main.py server server/tests utils
 #!/usr/bin/env python3
 ```
 
+Добавьте Type Hints к соответствующим фукнциям.
+
 # Документация
 
 [2to3 - Automated Python 2 to 3 code translation](https://docs.python.org/3/library/2to3.html)

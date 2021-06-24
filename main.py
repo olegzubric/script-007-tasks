@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import argparse
 import json
 import logging
@@ -67,7 +67,7 @@ def command_change_dir():
         RuntimeError: if directory does not exist and autocreate is False.
     """
 
-    new_path = raw_input('Input new working directory path: ')
+    new_path = input('Input new working directory path: ')
     return FileService.change_dir(new_path)
 
 
@@ -101,7 +101,7 @@ def command_get_file_data():
         ValueError: if filename is invalid.
     """
 
-    filename = raw_input('Input filename: ')
+    filename = input('Input filename: ')
     return FileService.get_file_data(filename)
 
 
@@ -119,8 +119,8 @@ def command_create_file():
         ValueError: if filename is invalid.
     """
 
-    filename = raw_input('Input filename: ')
-    content = raw_input('Input content: ')
+    filename = input('Input filename: ')
+    content = input('Input content: ')
     return FileService.create_file(filename, content)
 
 
@@ -131,7 +131,7 @@ def command_delete_file():
         RuntimeError: if file does not exist.
     """
 
-    filename = raw_input('Input filename: ')
+    filename = input('Input filename: ')
     return FileService.delete_file(filename)
 
 
@@ -184,7 +184,7 @@ def main():
 
     command_help()
     while True:
-        command = raw_input('Input command: ')
+        command = input('Input command: ')
         try:
             def cmd_unknown():
                 print("Unknown command: {}".format(command))

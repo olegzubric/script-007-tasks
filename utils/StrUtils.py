@@ -1,4 +1,9 @@
 import datetime
+import json
+
+
+def bytes2str(b: bytes) -> str:
+    return b.decode() if b else None
 
 
 def json_serialize_helper(obj):
@@ -9,3 +14,7 @@ def json_serialize_helper(obj):
         return serial
 
     return obj.__dict__
+
+
+def to_json(obj):
+    return json.dumps(obj, indent=2, sort_keys=True, default=json_serialize_helper)

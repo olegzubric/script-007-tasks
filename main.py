@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 import argparse
-import json
 import logging
 import logging.config
 import os
 import sys
 
 import server.FileService as FileService
-import utils.StrUtils as StrUtils
+from utils.StrUtils import to_json
 
 
 def commandline_parser():
@@ -154,7 +153,7 @@ def command_exit():
 def main():
     """Entry point of app.
 
-    Get and parse command line parameters and configure web app.
+    Get and parse command line parameters and configure CLI app.
 
     Command line options:
     -f --folder - working directory (absolute or relative path, default: current app folder).
@@ -178,9 +177,6 @@ def main():
         'delete': command_delete_file,
         'exit': command_exit,
     }
-
-    def to_json(obj):
-        return json.dumps(obj, indent=2, sort_keys=True, default=StrUtils.json_serialize_helper)
 
     command_help()
     while True:

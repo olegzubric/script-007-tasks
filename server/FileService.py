@@ -125,7 +125,7 @@ def get_file_data(filename: str) -> dict:
             'create_date': TimeUtils.floattime_to_datatime(os.path.getctime(local_file)),
             'edit_date': TimeUtils.floattime_to_datatime(os.path.getmtime(local_file)),
             'size': os.path.getsize(local_file),
-            'context': file_handler.read(),
+            'content': file_handler.read(),
         }
 
 
@@ -144,6 +144,7 @@ def create_file(filename: str, content: str = None) -> dict:
         - size (int): size of file in bytes
 
     Raises:
+        OSError: if filename is invalid.
         ValueError: if filename is invalid.
     """
 
@@ -154,15 +155,16 @@ def create_file(filename: str, content: str = None) -> dict:
 
     with open(local_file, 'wb') as file_handler:
         if content:
-            data = bytes(content)
-            file_handler.write(data)
+            file_handler.write(content.encode())
 
-    return {
-        'name': filename,
-        'create_date': TimeUtils.floattime_to_datatime(os.path.getctime(local_file)),
-        'size': os.path.getsize(local_file),
-        'content': content,
-    }
+    with open(local_file, 'rb') as file_handler:
+        return {
+            'name': filename,
+            'create_date': TimeUtils.floattime_to_datatime(os.path.getctime(local_file)),
+            # 'edit_date': TimeUtils.floattime_to_datatime(os.path.getmtime(local_file)),
+            'size': os.path.getsize(local_file),
+            'content': file_handler.read(),
+        }
 
 
 def delete_file(filename: str) -> None:

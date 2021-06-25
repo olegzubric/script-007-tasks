@@ -3,3 +3,4 @@ pytest-cov
 coverage
 2to3
 requests
+aiohttp

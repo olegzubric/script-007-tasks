@@ -24,8 +24,9 @@ def commandline_parser():
     parser.add_argument('--log-level', default='warning', choices=['debug', 'info', 'warning', 'error'],
                         help='Log level to console (default is warning)')
     parser.add_argument('-l', '--log-file', type=str, help='Log file.')
-    # TODO: add --port parameter
-
+    
+    parser.add_argument('-p', '--port', default=8080, type=int, help='Port for web server, default=8080')
+    
     return parser
 
 
@@ -79,7 +80,11 @@ def main():
     app = web.Application()
     app.add_routes([
         web.get('/', handler.handle),
-        # TODO: add more routes
+        web.post('/change_dir', handler.change_dir),
+        web.get('/files', handler.get_files),
+        web.get('/files/{filename}', handler.get_file_data),
+        web.post('/files', handler.create_file),
+        web.delete('/files/{filename}', handler.delete_file),
     ])
     logging.basicConfig(level=logging.INFO)
     web.run_app(app, port=params.port)

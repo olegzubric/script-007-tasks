@@ -1,11 +1,12 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 import argparse
-import json
+import logging
+import logging.config
 import os
 import sys
 
 import server.FileService as FileService
-import utils.StrUtils as StrUtils
+from utils.StrUtils import to_json
 
 
 def commandline_parser():
@@ -18,11 +19,44 @@ def commandline_parser():
     """
 
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-f', '--folder', default=os.path.join(os.getcwd(), 'data'),
-        help="working directory (default: 'data' folder)")
+    parser.add_argument('-f', '--folder', default=os.path.join(os.getcwd(), 'data'), type=str,
+                        help="working directory (default: 'data' folder)")
+    parser.add_argument('--log-level', default='warning', choices=['debug', 'info', 'warning', 'error'],
+                        help='Log level to console (default is warning)')
+    parser.add_argument('-l', '--log-file', type=str, help='Log file.')
 
     return parser
+
+
+def setup_logger(level='NOTSET', filename=None):
+    config = {
+        'version': 1,
+        'formatters': {
+            'default': {
+                'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',
+            },
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'default',
+                'level': level,
+            },
+        },
+        'root': {
+            'level': 'DEBUG',
+            'handlers': ['console'],
+        }
+    }
+    if filename:
+        config['handlers']['file'] = {
+            'class': 'logging.FileHandler',
+            'encoding': 'UTF-8',
+            'formatter': 'default',
+            'filename': filename,
+        }
+        config['root']['handlers'].append('file')
+    logging.config.dictConfig(config)
 
 
 def command_change_dir():
@@ -32,7 +66,7 @@ def command_change_dir():
         RuntimeError: if directory does not exist and autocreate is False.
     """
 
-    new_path = raw_input('Input new working directory path: ')
+    new_path = input('Input new working directory path: ')
     return FileService.change_dir(new_path)
 
 
@@ -66,7 +100,7 @@ def command_get_file_data():
         ValueError: if filename is invalid.
     """
 
-    filename = raw_input('Input filename: ')
+    filename = input('Input filename: ')
     return FileService.get_file_data(filename)
 
 
@@ -84,8 +118,8 @@ def command_create_file():
         ValueError: if filename is invalid.
     """
 
-    filename = raw_input('Input filename: ')
-    content = raw_input('Input content: ')
+    filename = input('Input filename: ')
+    content = input('Input content: ')
     return FileService.create_file(filename, content)
 
 
@@ -96,7 +130,7 @@ def command_delete_file():
         RuntimeError: if file does not exist.
     """
 
-    filename = raw_input('Input filename: ')
+    filename = input('Input filename: ')
     return FileService.delete_file(filename)
 
 
@@ -119,7 +153,7 @@ def command_exit():
 def main():
     """Entry point of app.
 
-    Get and parse command line parameters and configure web app.
+    Get and parse command line parameters and configure CLI app.
 
     Command line options:
     -f --folder - working directory (absolute or relative path, default: current app folder).
@@ -127,8 +161,12 @@ def main():
     """
     parser = commandline_parser()
     params = parser.parse_args()
+    setup_logger(level=logging.getLevelName(params.log_level.upper()), filename=params.log_file)
+
     path = params.folder
     FileService.change_dir(path)
+
+    logging.debug('initialized')
 
     functions = {
         'help': command_help,
@@ -142,24 +180,25 @@ def main():
 
     command_help()
     while True:
+        command = input('Input command: ')
         try:
-            command = raw_input('Input command: ')
-
             def cmd_unknown():
                 print("Unknown command: {}".format(command))
 
             result = functions.get(command, cmd_unknown)()
+            logging.debug('executing %s, result %s', command, to_json(result))
 
-            print(json.dumps({
+            print(to_json({
                 'status': 'success',
                 'result': result,
-            }, indent=2, sort_keys=True, default=StrUtils.json_serialize_helper))
+            }))
 
         except Exception as err:
-            print(json.dumps({
+            logging.info('executing %s, face an exception %s', command, str(err))
+            print(to_json({
                 'status': 'error',
                 'result': str(err),
-            }, indent=2, sort_keys=True, default=StrUtils.json_serialize_helper))
+            }))
 
 
 if __name__ == '__main__':

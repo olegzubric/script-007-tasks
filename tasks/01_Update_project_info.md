@@ -23,10 +23,10 @@ For Windows:
 > c:\Python27\python.exe -m pip install --upgrade virtualenv
 > c:\Python27\python.exe -m virtualenv venv2
 > venv2\Scripts\activate.bat
-> c:\Python27\python.exe -m pip install --upgrade pip
-> c:\Python27\python.exe -m pip install --upgrade wheel
-> c:\Python27\python.exe -m pip install --upgrade pathlib
-> pip install --upgrade -r requirements2.txt
+> python -m pip install --upgrade pip
+> python -m pip install --upgrade wheel
+> python -m pip install --upgrade pathlib
+> pip install --upgrade -r requirements.txt
 ```
 
 3. Create `requirements.txt` file:

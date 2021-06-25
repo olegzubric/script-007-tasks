@@ -5,15 +5,13 @@ import shutil
 
 import utils.TimeUtils as TimeUtils
 
-# logger = logging.getLogger(__name__)
 
-
-def _is_unsafe_folder_name(path):
+def _is_unsafe_folder_name(path: str) -> bool:
     # security check
-    return re.search(r'(^|[\\/])\.\.($|[\\/])', path)
+    return bool(re.search(r'(^|[\\/])\.\.($|[\\/])', path))
 
 
-def change_dir(path, autocreate=True):
+def change_dir(path: str, autocreate: bool = True) -> None:
     """Change current directory of app.
 
     Args:
@@ -37,7 +35,7 @@ def change_dir(path, autocreate=True):
     logging.debug('change working directory to %s', path)
 
 
-def get_files():
+def get_files() -> list:
     """Get info about all files in working directory.
 
     Returns:
@@ -71,7 +69,7 @@ def get_files():
     return data
 
 
-def _filename_to_local_path(filename, folder_autocreate=False):
+def _filename_to_local_path(filename: str, folder_autocreate: bool = False) -> str:
     """Get local path for filename.
 
     Args:
@@ -98,7 +96,7 @@ def _filename_to_local_path(filename, folder_autocreate=False):
     return full_filename
 
 
-def get_file_data(filename):
+def get_file_data(filename: str) -> dict:
     """Get full info about file.
 
     Args:
@@ -127,11 +125,11 @@ def get_file_data(filename):
             'create_date': TimeUtils.floattime_to_datatime(os.path.getctime(local_file)),
             'edit_date': TimeUtils.floattime_to_datatime(os.path.getmtime(local_file)),
             'size': os.path.getsize(local_file),
-            'context': file_handler.read(),
+            'content': file_handler.read(),
         }
 
 
-def create_file(filename, content=None):
+def create_file(filename: str, content: str = None) -> dict:
     """Create a new file.
 
     Args:
@@ -146,28 +144,30 @@ def create_file(filename, content=None):
         - size (int): size of file in bytes
 
     Raises:
+        OSError: if filename is invalid.
         ValueError: if filename is invalid.
     """
 
     local_file = _filename_to_local_path(filename)
 
     if os.path.exists(local_file):
-        logging.warn('file %s exists', local_file)
+        logging.warning('file %s exists', local_file)
 
     with open(local_file, 'wb') as file_handler:
         if content:
-            data = bytes(content)
-            file_handler.write(data)
+            file_handler.write(content.encode())
 
-    return {
-        'name': filename,
-        'create_date': TimeUtils.floattime_to_datatime(os.path.getctime(local_file)),
-        'size': os.path.getsize(local_file),
-        'content': content,
-    }
+    with open(local_file, 'rb') as file_handler:
+        return {
+            'name': filename,
+            'create_date': TimeUtils.floattime_to_datatime(os.path.getctime(local_file)),
+            # 'edit_date': TimeUtils.floattime_to_datatime(os.path.getmtime(local_file)),
+            'size': os.path.getsize(local_file),
+            'content': file_handler.read(),
+        }
 
 
-def delete_file(filename):
+def delete_file(filename: str) -> None:
     """Delete file.
 
     Args:
